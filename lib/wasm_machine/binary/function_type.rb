@@ -2,17 +2,22 @@ module WasmMachine::Binary
   # Representation of "Function Type"
   #
   # @see https://webassembly.github.io/spec/core/binary/types.html#function-types
+  # @see https://webassembly.github.io/spec/core/valid/types.html#function-types
   class FunctionType
+    include WasmMachine::Binary::Assertion
+
     MAGIC = 0x60
 
     attr_reader :parameters, :results
 
     # @param [WasmMachine::Binary::Reader] reader
     def initialize(reader)
-      raise WasmMachine::BinaryError unless reader.read_byte == MAGIC
+      assert(reader.read_byte == MAGIC)
 
       @parameters = read_value_types(reader)
       @results = read_value_types(reader)
+
+      assert(@results.size > 0)
     end
 
     # @return [String]

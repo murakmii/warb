@@ -2,6 +2,7 @@ module WasmMachine::Binary
   # Representation of "Table Types"
   #
   # @see https://webassembly.github.io/spec/core/binary/types.html#table-types
+  # @see https://webassembly.github.io/spec/core/valid/types.html#table-types
   class TableType
     include WasmMachine::Binary::Assertion
 
