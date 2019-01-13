@@ -28,6 +28,31 @@ RSpec.describe WasmMachine::Binary::Reader do
     end
   end
 
+  describe "#new_reader_for" do
+    subject { reader.new_reader_for(3) }
+
+    let(:reader) { described_class.new("\x01\x02\x03\x04\x05") }
+
+    it "returns new reader that contains specified bytes" do
+      expect(subject).to be_a described_class
+      expect(subject.read_until_eof).to eq "\x01\x02\x03"
+    end
+  end
+
+  describe "#read_until_eof" do
+    subject { reader.read_until_eof }
+
+    let(:reader) { described_class.new("\x01\x02\x03") }
+
+    it { is_expected.to eq "\x01\x02\x03" }
+
+    context "reached to EOF" do
+      before { reader.read_until_eof }
+
+      it { expect { subject }.to raise_error(WasmMachine::BinaryError) }
+    end
+  end
+
   describe "#read_byte" do
     subject { reader.read_byte }
 
