@@ -13,7 +13,7 @@ module WasmMachine::Binary
         raise WasmMachine::BinaryError, "Unsupport table element: 0x#{@element.to_s(16).upcase}"
       end
 
-      @limit = WasmMachine::Binary::Limit.new(reader)
+      @limit = WasmMachine::Binary::Limit.new(reader, range: 2**32)
     end
 
     # @return [String]
