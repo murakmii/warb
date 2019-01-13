@@ -3,6 +3,8 @@ module WasmMachine::Binary
   #
   # @see https://webassembly.github.io/spec/core/binary/types.html#binary-valtype
   class ValueType
+    attr_reader :symbol
+
     # @param [Integer] byte
     # @return [WasmMachine::Binary::ValueType]
     def self.from(byte)
@@ -20,35 +22,39 @@ module WasmMachine::Binary
       end
     end
 
+    # @return [WasmMachine::Binary::ValueType]
     def self.i32
       @i32 ||= new(:i32)
     end
 
+    # @return [WasmMachine::Binary::ValueType]
     def self.i64
       @i64 ||= new(:i64)
     end
 
+    # @return [WasmMachine::Binary::ValueType]
     def self.f32
       @f32 ||= new(:f32)
     end
 
+    # @return [WasmMachine::Binary::ValueType]
     def self.f64
       @f64 ||= new(:f64)
     end
 
-    # @param [Symbol] sym
-    def initialize(sym)
-      @sym = sym
+    # @param [Symbol] symbol
+    def initialize(symbol)
+      @symbol = symbol
     end
 
     # @return [Boolean]
     def ==(other)
-      other.is_a?(self.class) && @sym == other.instance_variable_get(:@sym)
+      other.is_a?(self.class) && symbol == other.symbol
     end
 
     # @return [String]
     def to_s
-      @sym.to_s
+      @symbol.to_s
     end
 
     # @return [String]
