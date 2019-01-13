@@ -3,15 +3,15 @@ module WasmMachine::Binary
   #
   # @see https://webassembly.github.io/spec/core/binary/types.html#table-types
   class TableType
+    include WasmMachine::Binary::Assertion
+
     attr_reader :element, :limit
 
     # @param [WasmMachine::Binary::Reader] reader
     def initialize(reader)
       @element = reader.read_byte
 
-      if @element != 0x70
-        raise WasmMachine::BinaryError, "Unsupport table element: 0x#{@element.to_s(16).upcase}"
-      end
+      assert(@element == 0x70, "Unsupport table element: 0x#{@element.to_s(16).upcase}")
 
       @limit = WasmMachine::Binary::Limit.new(reader, range: 2**32)
     end
