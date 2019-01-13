@@ -17,7 +17,8 @@ module WasmMachine::Binary
       @parameters = read_value_types(reader)
       @results = read_value_types(reader)
 
-      assert(@results.size > 0)
+      # Should we check results count?
+      # assert(@results.size > 0)
     end
 
     # @return [String]
