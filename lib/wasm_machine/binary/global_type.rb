@@ -3,6 +3,8 @@ module WasmMachine::Binary
   #
   # @see https://webassembly.github.io/spec/core/binary/types.html#global-types
   class GlobalType
+    include WasmMachine::Binary::Assertion
+
     attr_reader :value_type
 
     # @param [WasmMachine::Binary::Reader] reader
@@ -10,7 +12,7 @@ module WasmMachine::Binary
       @value_type = WasmMachine::Binary::ValueType.from(reader.read_byte)
       @mutable = reader.read_byte
 
-      raise WasmMachine::BinaryError if @mutable != 0 && @mutable != 1
+      assert(@mutable == 0 || @mutable == 1)
     end
 
     # @return [Boolean]
