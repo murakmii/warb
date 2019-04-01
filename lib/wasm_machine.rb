@@ -1,28 +1,13 @@
+require "stringio"
+
 module WasmMachine; end
-module WasmMachine::Binary; end
+module WasmMachine::Structure; end
 
 require "wasm_machine/version"
-
 require "wasm_machine/errors"
-require "wasm_machine/binary/reader"
-require "wasm_machine/binary/assertion"
-require "wasm_machine/binary/value_type"
-require "wasm_machine/binary/limit"
-require "wasm_machine/binary/memory_type"
-require "wasm_machine/binary/function_type"
-require "wasm_machine/binary/global_type"
-require "wasm_machine/binary/table_type"
-require "wasm_machine/binary/code"
-require "wasm_machine/binary/section/custom_section"
-require "wasm_machine/binary/section/type_section"
-require "wasm_machine/binary/section/import_section"
-require "wasm_machine/binary/section/function_section"
-require "wasm_machine/binary/section/table_section"
-require "wasm_machine/binary/section/memory_section"
-require "wasm_machine/binary/section/global_section"
-require "wasm_machine/binary/section/export_section"
-require "wasm_machine/binary/section/start_section"
-require "wasm_machine/binary/section/element_section"
-require "wasm_machine/binary/section/code_section"
-require "wasm_machine/binary/section/data_section"
-require "wasm_machine/binary/module"
+require "wasm_machine/binary_io"
+require "wasm_machine/value_type"
+require "wasm_machine/function_type"
+require "wasm_machine/limit"
+require "wasm_machine/memory"
+require "wasm_machine/module"
