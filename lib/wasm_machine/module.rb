@@ -33,6 +33,10 @@ module WasmMachine
         io.read_vector { WasmMachine::Memory.from_io(io) }
       end
 
+      def read_global_section(io, _)
+        io.read_vector { WasmMachine::Global.from_io(io) }
+      end
+
       def read_stub(io, size)
         io.read(size)
       end
@@ -48,6 +52,7 @@ module WasmMachine
       @function_types = []
       @functions = []
       @memories = []
+      @globals = []
 
       last_id = 0
       until io.eof? do
@@ -71,7 +76,7 @@ module WasmMachine
         when MEMORY_SECTION_ID
           @memories = self.class.read_memory_section(io, size)
         when GLOBAL_SECTION_ID
-          self.class.read_stub(io, size)
+          @globals = self.class.read_global_section(io, size)
         when EXPORT_SECTION_ID
           self.class.read_stub(io, size)
         when START_SECTION_ID

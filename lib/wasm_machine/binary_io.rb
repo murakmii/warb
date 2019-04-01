@@ -21,43 +21,22 @@ module WasmMachine
 
     # @return [Integer]
     def read_u32
-      u32 = 0
-      offset = 0
+      read_unsigned_leb128(32)
+    end
 
-      # https://webassembly.github.io/spec/core/binary/values.html#integers
-      loop do
-        b = readbyte
-        u32 |= ((b & 0x7F) << offset)
-
-        offset += 7
-        break if b[7] == 0
-
-        raise WasmMachine::BinaryError if offset >= 32
-      end
-
-      u32
+    # @return [Integer]
+    def read_u64
+      read_unsigned_leb128(64)
     end
 
     # @return [Integer]
     def read_i32
-      i32 = 0
-      offset = 0
+      read_signed_leb128(32)
+    end
 
-      loop do
-        b = readbyte
-        i32 |= ((b & 0x7F) << offset)
-
-        offset += 7
-        break if b[7] == 0
-
-        raise WasmMachine::BinaryError if offset >= 32
-      end
-
-      if i32[offset - 1] == 1
-        i32 | (~0 << offset)
-      else
-        i32
-      end
+    # @return [Integer]
+    def read_i64
+      read_signed_leb128(64)
     end
 
     # @return [Boolean]
@@ -81,5 +60,50 @@ module WasmMachine
         yield i
       end
     end
+
+    private
+
+      # @param [Integer]
+      # @return [Integer]
+      def read_unsigned_leb128(bits)
+        unsigned = 0
+        offset = 0
+
+        # https://webassembly.github.io/spec/core/binary/values.html#integers
+        loop do
+          b = readbyte
+          unsigned |= ((b & 0x7F) << offset)
+
+          offset += 7
+          break if b[7] == 0
+
+          raise WasmMachine::BinaryError if offset >= bits
+        end
+
+        unsigned
+      end
+
+      # @param [Integer]
+      # @return [Integer]
+      def read_signed_leb128(bits)
+        signed = 0
+        offset = 0
+
+        loop do
+          b = readbyte
+          signed |= ((b & 0x7F) << offset)
+
+          offset += 7
+          break if b[7] == 0
+
+          raise WasmMachine::BinaryError if offset >= bits
+        end
+
+        if signed[offset - 1] == 1
+          signed | (~0 << offset)
+        else
+          signed
+        end
+      end
   end
 end
