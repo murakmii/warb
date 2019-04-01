@@ -38,6 +38,28 @@ module WasmMachine
       u32
     end
 
+    # @return [Integer]
+    def read_i32
+      i32 = 0
+      offset = 0
+
+      loop do
+        b = readbyte
+        i32 |= ((b & 0x7F) << offset)
+
+        offset += 7
+        break if b[7] == 0
+
+        raise WasmMachine::BinaryError if offset >= 32
+      end
+
+      if i32[offset - 1] == 1
+        i32 | (~0 << offset)
+      else
+        i32
+      end
+    end
+
     # @return [Boolean]
     def read_flag
       b =readbyte
