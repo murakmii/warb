@@ -25,16 +25,27 @@ module WasmMachine
         io.read(size)
       end
 
-      def read_type_section(io, _)
+      def read_type_section(io)
         io.read_vector { WasmMachine::FunctionType.from_io(io) }
       end
 
-      def read_memory_section(io, _)
+      def read_memory_section(io)
         io.read_vector { WasmMachine::Memory.from_io(io) }
       end
 
-      def read_global_section(io, _)
+      def read_global_section(io)
         io.read_vector { WasmMachine::Global.from_io(io) }
+      end
+
+      def read_data_section(io, memories)
+        io.read_vector do
+          raise WasmMachine::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
+
+          memories.first.write(
+            WasmMachine::ConstantExpr.evaluate(io),
+            io.read(io.read_u32),
+          )
+        end
       end
 
       def read_stub(io, size)
@@ -66,7 +77,7 @@ module WasmMachine
         when CUSTOM_SECTION_ID
           self.class.read_custom_section(io, size)
         when TYPE_SECTION_ID
-          @function_types = self.class.read_type_section(io, size)
+          @function_types = self.class.read_type_section(io)
         when IMPORT_SECTION_ID
           self.class.read_stub(io, size)
         when FUCNTION_SECTION_ID
@@ -74,9 +85,9 @@ module WasmMachine
         when TABLE_SECTION_ID
           self.class.read_stub(io, size)
         when MEMORY_SECTION_ID
-          @memories = self.class.read_memory_section(io, size)
+          @memories = self.class.read_memory_section(io)
         when GLOBAL_SECTION_ID
-          @globals = self.class.read_global_section(io, size)
+          @globals = self.class.read_global_section(io)
         when EXPORT_SECTION_ID
           self.class.read_stub(io, size)
         when START_SECTION_ID
@@ -86,7 +97,7 @@ module WasmMachine
         when CODE_SECTION_ID
           self.class.read_stub(io, size)
         when DATA_SECTION_ID
-          self.class.read_stub(io, size)
+          self.class.read_data_section(io, @memories)
         else
           raise WasmMachine::BinaryError, "Unsupported section id: #{section_id}"
         end

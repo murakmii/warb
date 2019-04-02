@@ -1,5 +1,7 @@
 module WasmMachine
   class Limit
+    attr_reader :minimum, :maximum
+
     def self.from_io(io)
       has_max = io.read_flag
       new(io.read_u32, has_max ? io.read_u32 : nil)

@@ -1,5 +1,4 @@
 # Utility for IRB
 def wasm(file)
-  reader = WasmMachine::Binary::Reader.new(File.read(file))
-  WasmMachine::Binary::Module.new(reader)
+  WasmMachine::Module.new(File.read(file))
 end
