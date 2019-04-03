@@ -29,12 +29,29 @@ module WasmMachine
         io.read_vector { WasmMachine::FunctionType.from_io(io) }
       end
 
+      def read_function_section(io, function_types)
+        io.read_vector do
+          typeidx = io.read_u32
+          raise WasmMachine::BinaryError if typeidx >= function_types.size
+
+          WasmMachine::Function.new(function_types[typeidx])
+        end
+      end
+
       def read_memory_section(io)
         io.read_vector { WasmMachine::Memory.from_io(io) }
       end
 
       def read_global_section(io)
         io.read_vector { WasmMachine::Global.from_io(io) }
+      end
+
+      def read_code_section(io, functions)
+        io.read_vector do |i|
+          raise WasmMachine::BinaryError unless functions[i]
+
+          functions[i].set_code_from_io(io)
+        end
       end
 
       def read_data_section(io, memories)
@@ -81,7 +98,7 @@ module WasmMachine
         when IMPORT_SECTION_ID
           self.class.read_stub(io, size)
         when FUCNTION_SECTION_ID
-          self.class.read_stub(io, size)
+          @functions = self.class.read_function_section(io, @function_types)
         when TABLE_SECTION_ID
           self.class.read_stub(io, size)
         when MEMORY_SECTION_ID
@@ -95,7 +112,7 @@ module WasmMachine
         when ELEMENT_SECTION_ID
           self.class.read_stub(io, size)
         when CODE_SECTION_ID
-          self.class.read_stub(io, size)
+          self.class.read_code_section(io, @functions)
         when DATA_SECTION_ID
           self.class.read_data_section(io, @memories)
         else
