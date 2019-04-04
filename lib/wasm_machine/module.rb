@@ -16,15 +16,6 @@ module WasmMachine
     DATA_SECTION_ID     = 11
 
     class << self
-      # Read custom section(Currently, this method ignore custom section)
-      #
-      # @param [BinaryIO] io
-      # @param [Integer] size
-      def read_custom_section(io, size)
-        io.read_utf8
-        io.read(size)
-      end
-
       def read_type_section(io)
         io.read_vector { WasmMachine::FunctionType.from_io(io) }
       end
@@ -81,18 +72,22 @@ module WasmMachine
       @functions = []
       @memories = []
       @globals = []
+      @customs = []
 
       last_id = 0
       until io.eof? do
         section_id = io.readbyte
-        raise WasmMachine::BinaryError if section_id < last_id
-
         size = io.read_u32
         expected_pos = io.pos + size
 
+        if section_id == CUSTOM_SECTION_ID
+          @customs << WasmMachine::Custom.from_io(io, size)
+        else
+          raise WasmMachine::BinaryError if section_id < last_id
+          last_id = section_id
+        end
+
         case section_id
-        when CUSTOM_SECTION_ID
-          self.class.read_custom_section(io, size)
         when TYPE_SECTION_ID
           @function_types = self.class.read_type_section(io)
         when IMPORT_SECTION_ID
@@ -116,11 +111,12 @@ module WasmMachine
         when DATA_SECTION_ID
           self.class.read_data_section(io, @memories)
         else
-          raise WasmMachine::BinaryError, "Unsupported section id: #{section_id}"
+          unless section_id == CUSTOM_SECTION_ID
+            raise WasmMachine::BinaryError, "Unsupported section id: #{section_id}"
+          end
         end
 
         raise WasmMachine::BinaryError unless io.pos == expected_pos
-        last_id = section_id
       end
     end
   end
