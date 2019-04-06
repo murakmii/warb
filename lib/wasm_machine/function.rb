@@ -3,7 +3,7 @@ module WasmMachine
     def initialize(type)
       @type = type
       @locals = []
-      @expr = nil
+      @block = nil
     end
 
     def set_code_from_io(io)
@@ -19,11 +19,13 @@ module WasmMachine
         )
       end
 
-      @expr = io.read(size - (io.pos - pos))
+      raise WasmMachine::BinaryError unless @type.param_types == @locals.slice(0, @type.param_types.size)
+
+      @block = WasmMachine::ControlFlow::Block.from_function_body(@type, io.read(size - (io.pos - pos)))
     end
 
     def inspect
-      "#<#{self.class} locals:#{@locals.size} expr:#{@expr.size}>"
+      "#<#{self.class} locals:#{@locals.size}>"
     end
   end
 end

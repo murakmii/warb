@@ -1,5 +1,7 @@
 module WasmMachine
   class FunctionType
+    attr_reader :param_types, :return_type
+
     def self.from_io(io)
       raise WasmMachine::BinaryError unless io.readbyte == 0x60
 
@@ -10,14 +12,16 @@ module WasmMachine
     end
 
     def initialize(param_types, return_types)
+      raise WasmMachine::BinaryError if return_types.size > 1
+
       @param_types = param_types
-      @return_types = return_types
+      @return_type = return_types.first
     end
 
     def inspect
       "#<#{self.class} " \
       "(#{@param_types.map(&:inspect).join(",")})=>" \
-      "(#{@return_types.map(&:inspect).join(",")})>" \
+      "(#{@return_type})>" \
     end
   end
 end
