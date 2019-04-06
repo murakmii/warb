@@ -11,5 +11,7 @@ Gemfile.lock
 /vendor/
 *.wasm
 
+.irb_history
+
 # rspec failure tracking
 .rspec_status

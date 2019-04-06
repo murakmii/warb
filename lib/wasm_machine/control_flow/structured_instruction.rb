@@ -10,5 +10,14 @@ module WasmMachine::ControlFlow
       @start_index = start_index
       @nested_blocks = []
     end
+
+    def flatten_nested_blocks
+      flatten = { start_index => self }
+      nested_blocks.each do |block|
+        flatten[block.start_index] = block
+        flatten.merge!(block.flatten_nested_blocks)
+      end
+      flatten
+    end
   end
 end

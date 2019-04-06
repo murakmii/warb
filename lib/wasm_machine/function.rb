@@ -1,9 +1,12 @@
 module WasmMachine
   class Function
+    attr_reader :type, :locals, :blocks, :instructions
+
     def initialize(type)
       @type = type
       @locals = []
-      @block = nil
+      @instructions = nil
+      @blocks = nil
     end
 
     def set_code_from_io(io)
@@ -21,11 +24,13 @@ module WasmMachine
 
       raise WasmMachine::BinaryError unless @type.param_types == @locals.slice(0, @type.param_types.size)
 
-      @block = WasmMachine::ControlFlow::Block.from_function_body(@type, io.read(size - (io.pos - pos)))
+      @instructions = WasmMachine::BinaryIO.new(io.read(size - (io.pos - pos)))
+      @blocks = WasmMachine::ControlFlow::Block.from_function_body(@type, @instructions).flatten_nested_blocks
+      @instructions.rewind
     end
 
     def inspect
-      "#<#{self.class} locals:#{@locals.size}>"
+      "#<#{self.class} locals:#{@locals.size} instr:#{@instructions.size}>"
     end
   end
 end

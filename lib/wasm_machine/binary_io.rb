@@ -63,6 +63,11 @@ module WasmMachine
       raise WasmMachine::BinaryError
     end
 
+    # @return [Integer]
+    def advance
+      readbyte
+    end
+
     # @param [Integer] bits
     def skip_leb128(bits)
       skipped_bits = 0

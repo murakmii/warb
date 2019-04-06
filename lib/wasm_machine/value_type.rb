@@ -18,23 +18,28 @@ module WasmMachine
     end
 
     def self.i32
-      @i32 ||= new(:i32)
+      @i32 ||= new(:i32, 0)
     end
 
     def self.i64
-      @i64 ||= new(:i64)
+      @i64 ||= new(:i64, 0)
     end
 
     def self.f32
-      @f32 ||= new(:f32)
+      @f32 ||= new(:f32, 0.0)
     end
 
     def self.f64
-      @f64 ||= new(:f64)
+      @f64 ||= new(:f64, 0.0)
     end
 
-    def initialize(sym)
+    def initialize(sym, zero_value)
       @sym = sym
+      @zero_value = zero_value
+    end
+
+    def zero_value
+      WasmMachine::Value.new(self, @zero_value)
     end
 
     def ==(t)

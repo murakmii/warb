@@ -9,9 +9,7 @@ module WasmMachine::ControlFlow
     }
 
     class << self
-      def from_function_body(function_type, body)
-        io = WasmMachine::BinaryIO.new(body)
-
+      def from_function_body(function_type, io)
         block = new(function_type.return_type, 0)
         block.nested_blocks = decode_nested_blocks(io, block)
 

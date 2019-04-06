@@ -15,7 +15,13 @@ module WasmMachine
     CODE_SECTION_ID     = 10
     DATA_SECTION_ID     = 11
 
+    attr_reader :functions
+
     class << self
+      def from_file(file)
+        new(File.read(file))
+      end
+
       def read_type_section(io)
         io.read_vector { WasmMachine::FunctionType.from_io(io) }
       end
