@@ -1,8 +1,12 @@
-# (WIP) WASM Machine
+# (WIP) WARB
+
+WARB is WebAssembly interpreter implemented by pure Ruby.
 
 ```ruby
-reader = WARB::Binary::Reader.new(File.read("main.wasm"))
-mod = WARB::Binary::Module.new(reader)
+mod = WARB::Module.from_file("fib.wasm")
 
-# TODO: build machine and evaluate expression
+invocation = WARB::Invocation.new(mod, mod.functions.last)
+
+invocation.execute(WARB::ValueType.i32, 30)
+=> #<WARB::Value i32 value:832040>
 ```
