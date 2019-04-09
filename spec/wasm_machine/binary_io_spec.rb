@@ -1,4 +1,4 @@
-RSpec.describe WasmMachine::BinaryIO do
+RSpec.describe WARB::BinaryIO do
   describe "#reamin" do
     subject { io.remain }
 
@@ -24,7 +24,7 @@ RSpec.describe WasmMachine::BinaryIO do
     context "specified size is greater than remained binary size" do
       let(:n) { 4 }
 
-      it { expect { subject }.to raise_error(WasmMachine::BinaryError) }
+      it { expect { subject }.to raise_error(WARB::BinaryError) }
     end
   end
 
@@ -38,7 +38,7 @@ RSpec.describe WasmMachine::BinaryIO do
     context "reached to EOF" do
       before { io.readbyte }
 
-      it { expect { subject }.to raise_error(WasmMachine::BinaryError) }
+      it { expect { subject }.to raise_error(WARB::BinaryError) }
     end
   end
 

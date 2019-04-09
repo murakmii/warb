@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Frame
     attr_reader :func, :local_vars
 
@@ -24,7 +24,7 @@ module WasmMachine
     end
 
     def jump_to_continuation_of_block(block)
-      if block.is_a?(WasmMachine::ControlFlow::Loop)
+      if block.is_a?(WARB::ControlFlow::Loop)
         @func.instructions.pos = block.before_block_index
       else
         @func.instructions.pos = block.end_index + 1

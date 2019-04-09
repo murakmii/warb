@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Function
     attr_reader :type, :locals, :blocks, :instructions
 
@@ -17,15 +17,15 @@ module WasmMachine
         @locals.concat(
           Array.new(
             io.read_u32,
-            WasmMachine::ValueType.from_byte(io.readbyte),
+            WARB::ValueType.from_byte(io.readbyte),
           )
         )
       end
 
-      raise WasmMachine::BinaryError unless @type.param_types == @locals.slice(0, @type.param_types.size)
+      raise WARB::BinaryError unless @type.param_types == @locals.slice(0, @type.param_types.size)
 
-      @instructions = WasmMachine::BinaryIO.new(io.read(size - (io.pos - pos)))
-      @blocks = WasmMachine::ControlFlow::Block.from_function_body(@type, @instructions).flatten_nested_blocks
+      @instructions = WARB::BinaryIO.new(io.read(size - (io.pos - pos)))
+      @blocks = WARB::ControlFlow::Block.from_function_body(@type, @instructions).flatten_nested_blocks
       @instructions.rewind
     end
 

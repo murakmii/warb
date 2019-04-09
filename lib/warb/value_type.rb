@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class ValueType
     attr_reader :sym
 
@@ -13,7 +13,7 @@ module WasmMachine
       when 0x7C
         f64
       else
-        raise WasmMachine::BinaryError
+        raise WARB::BinaryError
       end
     end
 
@@ -39,7 +39,7 @@ module WasmMachine
     end
 
     def zero_value
-      WasmMachine::Value.new(self, @zero_value)
+      WARB::Value.new(self, @zero_value)
     end
 
     def ==(t)

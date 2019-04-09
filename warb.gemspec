@@ -1,17 +1,17 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "wasm_machine/version"
+require "warb/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "wasm_machine"
-  spec.version       = WasmMachine::VERSION
+  spec.name          = "warb"
+  spec.version       = WARB::VERSION
   spec.authors       = ["murakmii"]
   spec.email         = ["bonono.jp@gmail.com"]
 
-  spec.summary       = %q{WebAssembly machine implemented ruby}
-  spec.description   = %q{WebAssembly machine implemented ruby}
-  spec.homepage      = "https://github.com/murakmii/wasm_machine"
+  spec.summary       = %q{WebAssembly interpreter implemented by Ruby}
+  spec.description   = %q{WebAssembly interpreter implemented by Ruby}
+  spec.homepage      = "https://github.com/murakmii/warb"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

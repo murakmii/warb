@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Limit
     attr_reader :minimum, :maximum
 
@@ -8,7 +8,7 @@ module WasmMachine
     end
 
     def initialize(min, max)
-      raise WasmMachine::BinaryError if max && max < min
+      raise WARB::BinaryError if max && max < min
 
       @minimum = min
       @maximum = max

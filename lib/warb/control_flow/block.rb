@@ -1,11 +1,11 @@
-module WasmMachine::ControlFlow
+module WARB::ControlFlow
   class Block
-    include WasmMachine::ControlFlow::StructuredInstruction
+    include WARB::ControlFlow::StructuredInstruction
 
     BLOCK_CLASSES = {
       0x02 => self,
-      0x03 => WasmMachine::ControlFlow::Loop,
-      0x04 => WasmMachine::ControlFlow::IfElse,
+      0x03 => WARB::ControlFlow::Loop,
+      0x04 => WARB::ControlFlow::IfElse,
     }
 
     class << self
@@ -13,7 +13,7 @@ module WasmMachine::ControlFlow
         block = new(function_type.return_type, 0)
         block.nested_blocks = decode_nested_blocks(io, block)
 
-        raise WasmMachine::BinaryError unless io.eof?
+        raise WARB::BinaryError unless io.eof?
 
         block.end_index = io.pos - 1
         block
@@ -23,7 +23,7 @@ module WasmMachine::ControlFlow
 
         def decode_arity(io)
           blocktype = io.readbyte
-          blocktype == 0x40 ? nil : WasmMachine::ValueType.from_byte(blocktype)
+          blocktype == 0x40 ? nil : WARB::ValueType.from_byte(blocktype)
         end
 
         def decode_nested_blocks(io, current_block)
@@ -39,7 +39,7 @@ module WasmMachine::ControlFlow
               block.end_index = io.pos - 1
               blocks << block
             when 0x05
-              raise WasmMachine::BinaryError unless current_block.is_a?(WasmMachine::ControlFlow::IfElse) && current_block.else_start_index.nil?
+              raise WARB::BinaryError unless current_block.is_a?(WARB::ControlFlow::IfElse) && current_block.else_start_index.nil?
 
               current_block.else_start_index = io.pos
               current_block.else_nested_blocks = decode_nested_blocks(io, current_block)

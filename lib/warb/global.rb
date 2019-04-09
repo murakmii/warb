@@ -1,12 +1,12 @@
-module WasmMachine
+module WARB
   class Global
     attr_reader :value_type, :value
 
     def self.from_io(io)
       new(
-        WasmMachine::ValueType.from_byte(io.readbyte),
+        WARB::ValueType.from_byte(io.readbyte),
         io.read_flag,
-        WasmMachine::ConstantExpr.evaluate(io)
+        WARB::ConstantExpr.evaluate(io)
       )
     end
 

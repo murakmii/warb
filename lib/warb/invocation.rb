@@ -1,9 +1,9 @@
-module WasmMachine
+module WARB
   class Invocation
     def initialize(mod, func)
       @mod = mod
       @func = func
-      @stack = WasmMachine::Stack.new
+      @stack = WARB::Stack.new
     end
 
     def execute(*args)
@@ -17,7 +17,7 @@ module WasmMachine
       ret =
         loop do
           instr = @stack.current_frame.func.instructions.advance
-          WasmMachine::Instructions::MAP[instr].call(@mod, @stack, @stack.current_frame)
+          WARB::Instructions::MAP[instr].call(@mod, @stack, @stack.current_frame)
 
           if @stack.frames == 1 && @stack.current_frame.func.instructions.eof?
             @stack.pop_current_frame

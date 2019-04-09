@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class BinaryIO < ::StringIO
     SINGLE_LEB128_32_SKIPPER = ->(io) { io.skip_leb128(32) }
     DOUBLE_LEB128_32_SKIPPER = ->(io) { io.skip_leb128(32); io.skip_leb128(32) }
@@ -40,7 +40,7 @@ module WasmMachine
       when 0x45..0xBF
         nil
       else
-        ->(_) { raise WasmMachine::BinaryError }
+        ->(_) { raise WARB::BinaryError }
       end
     end
 
@@ -52,7 +52,7 @@ module WasmMachine
     # @param [Integer] n
     # @return [String]
     def read(n)
-      raise WasmMachine::BinaryError if n > remain
+      raise WARB::BinaryError if n > remain
       super
     end
 
@@ -60,7 +60,7 @@ module WasmMachine
     def readbyte
       super
     rescue EOFError
-      raise WasmMachine::BinaryError
+      raise WARB::BinaryError
     end
 
     # @return [Integer]
@@ -72,7 +72,7 @@ module WasmMachine
     def skip_leb128(bits)
       skipped_bits = 0
       loop do
-        raise WasmMachine::BinaryError if skipped_bits >= bits
+        raise WARB::BinaryError if skipped_bits >= bits
         break if readbyte[7] == 0
         skipped_bits += 8
       end
@@ -101,7 +101,7 @@ module WasmMachine
     # @return [Boolean]
     def read_flag
       b =readbyte
-      raise WasmMachine::BinaryError if b != 0 && b != 1
+      raise WARB::BinaryError if b != 0 && b != 1
       b == 1
     end
 
@@ -148,7 +148,7 @@ module WasmMachine
           offset += 7
           break if b[7] == 0
 
-          raise WasmMachine::BinaryError if offset >= bits
+          raise WARB::BinaryError if offset >= bits
         end
 
         unsigned
@@ -167,7 +167,7 @@ module WasmMachine
           offset += 7
           break if b[7] == 0
 
-          raise WasmMachine::BinaryError if offset >= bits
+          raise WARB::BinaryError if offset >= bits
         end
 
         if signed[offset - 1] == 1

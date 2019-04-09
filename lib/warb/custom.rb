@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Custom
     attr_reader :name, :bytes
 

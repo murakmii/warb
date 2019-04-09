@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Instructions
     MAP = Array.new(256) do |instr|
       case instr
@@ -27,7 +27,7 @@ module WasmMachine
       when 0x0D
         ->(mod, stack, frame) {
           nth = frame.func.instructions.read_u32
-          raise WasmMachine::BinaryError unless stack.peek.is_a?(WasmMachine::Value) && stack.peek.type == WasmMachine::ValueType.i32
+          raise WARB::BinaryError unless stack.peek.is_a?(WARB::Value) && stack.peek.type == WARB::ValueType.i32
 
           v = stack.pop.value
           if v != 0
@@ -38,15 +38,15 @@ module WasmMachine
       when 0x20
         ->(_, stack, frame) {
           idx = frame.func.instructions.read_u32
-          raise WasmMachine::BinaryError unless frame.local_vars[idx]
+          raise WARB::BinaryError unless frame.local_vars[idx]
           stack.push(frame.local_vars[idx])
         }
 
       when 0x21
         ->(_, stack, frame) {
           idx = frame.func.instructions.read_u32
-          raise WasmMachine::BinaryError unless frame.local_vars[idx]
-          raise WasmMachine::BinaryError unless stack.peek.is_a?(WasmMachine::Value)
+          raise WARB::BinaryError unless frame.local_vars[idx]
+          raise WARB::BinaryError unless stack.peek.is_a?(WARB::Value)
 
           frame.local_vars[idx] = stack.pop
         }
@@ -54,8 +54,8 @@ module WasmMachine
       when 0x22
         ->(_, stack, frame) {
           idx = frame.func.instructions.read_u32
-          raise WasmMachine::BinaryError unless frame.local_vars[idx]
-          raise WasmMachine::BinaryError unless stack.peek.is_a?(WasmMachine::Value)
+          raise WARB::BinaryError unless frame.local_vars[idx]
+          raise WARB::BinaryError unless stack.peek.is_a?(WARB::Value)
 
           frame.local_vars[idx] = stack.peek
         }
@@ -63,33 +63,33 @@ module WasmMachine
       when 0x41
         ->(_, stack, frame) {
           v = frame.func.instructions.read_i32
-          stack.push_value(WasmMachine::ValueType.i32, v)
+          stack.push_value(WARB::ValueType.i32, v)
         }
 
       when 0x48
         ->(_, stack, frame) {
           t2 = stack.pop
-          raise WasmMachine::BinaryError unless t2.is_a?(WasmMachine::Value) && t2.type == WasmMachine::ValueType.i32
+          raise WARB::BinaryError unless t2.is_a?(WARB::Value) && t2.type == WARB::ValueType.i32
 
           t1 = stack.pop
-          raise WasmMachine::BinaryError unless t1.is_a?(WasmMachine::Value) && t1.type == WasmMachine::ValueType.i32
+          raise WARB::BinaryError unless t1.is_a?(WARB::Value) && t1.type == WARB::ValueType.i32
 
-          stack.push_value(WasmMachine::ValueType.i32, t1.value < t2.value ? 1 : 0)
+          stack.push_value(WARB::ValueType.i32, t1.value < t2.value ? 1 : 0)
         }
 
       when 0x6A
         ->(_, stack, frame) {
           t2 = stack.pop
-          raise WasmMachine::BinaryError unless t2.is_a?(WasmMachine::Value) && t2.type == WasmMachine::ValueType.i32
+          raise WARB::BinaryError unless t2.is_a?(WARB::Value) && t2.type == WARB::ValueType.i32
 
           t1 = stack.pop
-          raise WasmMachine::BinaryError unless t1.is_a?(WasmMachine::Value) && t1.type == WasmMachine::ValueType.i32
+          raise WARB::BinaryError unless t1.is_a?(WARB::Value) && t1.type == WARB::ValueType.i32
 
-          stack.push_value(WasmMachine::ValueType.i32, t1.value + t2.value)
+          stack.push_value(WARB::ValueType.i32, t1.value + t2.value)
         }
 
       else
-        ->(_, _, _) { raise WasmMachine::BinaryError }
+        ->(_, _, _) { raise WARB::BinaryError }
       end
     end
   end

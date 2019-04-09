@@ -1,4 +1,4 @@
-module WasmMachine::ControlFlow
+module WARB::ControlFlow
   module StructuredInstruction
     def self.included(klass)
       klass.attr_reader :arity, :start_index

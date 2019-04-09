@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Stack
     def initialize
       @stack = []
@@ -28,13 +28,13 @@ module WasmMachine
 
     def pop_label(nth)
       index = find_nth_label_index(nth)
-      raise WasmMachine::BinaryError unless index
+      raise WARB::BinaryError unless index
 
       label = @stack[index]
       value = nil
       if label.block.arity
         value = pop
-        raise WasmMachine::BinaryError unless value.is_a?(WasmMachine::Value) && value.type == label.block.arity
+        raise WARB::BinaryError unless value.is_a?(WARB::Value) && value.type == label.block.arity
       end
 
       @stack.slice!(index..-1)
@@ -44,15 +44,15 @@ module WasmMachine
     end
 
     def pop_current_frame
-      raise WasmMachine::BinaryError unless current_frame
+      raise WARB::BinaryError unless current_frame
 
       return_value = nil
       if current_frame.func.type.return_type
-        raise WasmMachine::BinaryError unless peek.is_a?(WasmMachine::Value) && peek.type == current_frame.func.type.return_type
+        raise WARB::BinaryError unless peek.is_a?(WARB::Value) && peek.type == current_frame.func.type.return_type
         return_value = pop
       end
 
-      raise WasmMachine::BinaryError unless @frame_indexes.last == (@stack.size - 1)
+      raise WARB::BinaryError unless @frame_indexes.last == (@stack.size - 1)
 
       @stack.pop
       @frame_indexes.pop
@@ -75,22 +75,22 @@ module WasmMachine
     end
 
     def push_value(type, value)
-      @stack << WasmMachine::Value.new(type, value)
+      @stack << WARB::Value.new(type, value)
     end
 
     def push_label(block)
-      @stack << WasmMachine::Label.new(block)
+      @stack << WARB::Label.new(block)
     end
 
     def push_new_frame(func)
       args = Array.new(func.type.param_types.size)
       func.type.param_types.each.with_index do |t, i|
         arg = pop
-        raise WasmMachine::BinaryError unless arg.type == t
+        raise WARB::BinaryError unless arg.type == t
         args[i] = arg
       end
 
-      frame = WasmMachine::Frame.new(func, args)
+      frame = WARB::Frame.new(func, args)
 
       current_frame&.on_deactivated
       func.instructions.rewind
@@ -103,9 +103,9 @@ module WasmMachine
     def find_nth_label_index(nth)
       n = 0
       @stack.each_with_index.reverse_each do |e, i|
-        if e.is_a?(WasmMachine::Frame)
+        if e.is_a?(WARB::Frame)
           break nil
-        elsif e.is_a?(WasmMachine::Label)
+        elsif e.is_a?(WARB::Label)
           if n == nth
             break i
           else

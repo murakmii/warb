@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class ConstantExpr
     def self.evaluate(io)
       instr = io.readbyte
@@ -10,10 +10,10 @@ module WasmMachine
           io.read_i64
         else
           # TODO: support f32, f64, global.get
-          raise WasmMachine::BinaryError, "Instruction:0x#{instr.to_s(16).upcase} is NOT supported"
+          raise WARB::BinaryError, "Instruction:0x#{instr.to_s(16).upcase} is NOT supported"
         end
 
-      io.readbyte == 0x0B ? value : raise(WasmMachine::BinaryError)
+      io.readbyte == 0x0B ? value : raise(WARB::BinaryError)
     end
   end
 end

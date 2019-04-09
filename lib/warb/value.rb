@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Value
     attr_reader :type
     attr_accessor :value

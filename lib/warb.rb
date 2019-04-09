@@ -1,0 +1,27 @@
+require "stringio"
+
+module WARB; end
+module WARB::ControlFlow; end
+
+require "warb/version"
+require "warb/errors"
+require "warb/binary_io"
+require "warb/value_type"
+require "warb/function_type"
+require "warb/control_flow/structured_instruction"
+require "warb/control_flow/if_else"
+require "warb/control_flow/loop"
+require "warb/control_flow/block"
+require "warb/frame"
+require "warb/instructions"
+require "warb/invocation"
+require "warb/label"
+require "warb/stack"
+require "warb/value"
+require "warb/function"
+require "warb/limit"
+require "warb/constant_expr"
+require "warb/custom"
+require "warb/memory"
+require "warb/global"
+require "warb/module"

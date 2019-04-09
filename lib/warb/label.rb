@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Label
     attr_reader :block
 

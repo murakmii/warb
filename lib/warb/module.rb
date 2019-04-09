@@ -1,4 +1,4 @@
-module WasmMachine
+module WARB
   class Module
     MAGIC_AND_VERSION = "\x00\x61\x73\x6D\x01\x00\x00\x00"
 
@@ -23,29 +23,29 @@ module WasmMachine
       end
 
       def read_type_section(io)
-        io.read_vector { WasmMachine::FunctionType.from_io(io) }
+        io.read_vector { WARB::FunctionType.from_io(io) }
       end
 
       def read_function_section(io, function_types)
         io.read_vector do
           typeidx = io.read_u32
-          raise WasmMachine::BinaryError if typeidx >= function_types.size
+          raise WARB::BinaryError if typeidx >= function_types.size
 
-          WasmMachine::Function.new(function_types[typeidx])
+          WARB::Function.new(function_types[typeidx])
         end
       end
 
       def read_memory_section(io)
-        io.read_vector { WasmMachine::Memory.from_io(io) }
+        io.read_vector { WARB::Memory.from_io(io) }
       end
 
       def read_global_section(io)
-        io.read_vector { WasmMachine::Global.from_io(io) }
+        io.read_vector { WARB::Global.from_io(io) }
       end
 
       def read_code_section(io, functions)
         io.read_vector do |i|
-          raise WasmMachine::BinaryError unless functions[i]
+          raise WARB::BinaryError unless functions[i]
 
           functions[i].set_code_from_io(io)
         end
@@ -53,10 +53,10 @@ module WasmMachine
 
       def read_data_section(io, memories)
         io.read_vector do
-          raise WasmMachine::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
+          raise WARB::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
 
           memories.first.write(
-            WasmMachine::ConstantExpr.evaluate(io),
+            WARB::ConstantExpr.evaluate(io),
             io.read(io.read_u32),
           )
         end
@@ -68,10 +68,10 @@ module WasmMachine
     end
 
     def initialize(binary)
-      io = WasmMachine::BinaryIO.new(binary)
+      io = WARB::BinaryIO.new(binary)
 
       unless io.read(MAGIC_AND_VERSION.length) == MAGIC_AND_VERSION
-        raise WasmMachine::BinaryError, "Invalid header"
+        raise WARB::BinaryError, "Invalid header"
       end
 
       @function_types = []
@@ -87,9 +87,9 @@ module WasmMachine
         expected_pos = io.pos + size
 
         if section_id == CUSTOM_SECTION_ID
-          @customs << WasmMachine::Custom.from_io(io, size)
+          @customs << WARB::Custom.from_io(io, size)
         else
-          raise WasmMachine::BinaryError if section_id < last_id
+          raise WARB::BinaryError if section_id < last_id
           last_id = section_id
         end
 
@@ -118,11 +118,11 @@ module WasmMachine
           self.class.read_data_section(io, @memories)
         else
           unless section_id == CUSTOM_SECTION_ID
-            raise WasmMachine::BinaryError, "Unsupported section id: #{section_id}"
+            raise WARB::BinaryError, "Unsupported section id: #{section_id}"
           end
         end
 
-        raise WasmMachine::BinaryError unless io.pos == expected_pos
+        raise WARB::BinaryError unless io.pos == expected_pos
       end
     end
   end
