@@ -1,8 +1,8 @@
 module WARB
-  class BinaryIO < ::StringIO
+  class ModuleIO < ::StringIO
     SINGLE_LEB128_32_SKIPPER = ->(io) { io.skip_leb128(32) }
-    DOUBLE_LEB128_32_SKIPPER = ->(io) { io.skip_leb128(32); io.skip_leb128(32) }
-    BYTE_SKIPPER = ->(io) { io.pos += 1 }
+    DOUBLE_LEB128_32_SKIPPER = ->(io) { io.skip_leb128(32).skip_leb128(32) }
+    BYTE_SKIPPER = ->(io) { io.skip_bytes(1) }
 
     NON_STRUCTURED_INSTR_SKIPPER_MAP = Array.new(256) do |instr|
       case instr
@@ -17,10 +17,7 @@ module WARB
       when 0x10
         SINGLE_LEB128_32_SKIPPER
       when 0x11
-        ->(io) {
-          io.skip_leb128(32)
-          io.pos += 1
-        }
+        ->(io) { io.skip_leb128(32).skip_bytes(1) }
       when 0x1A, 0x1B
         nil
       when 0x20..0x24
@@ -34,13 +31,22 @@ module WARB
       when 0x42
         ->(io) { io.skip_leb128(64) }
       when 0x43
-        ->(io) { io.pos += 4 }
+        ->(io) { io.skip_bytes(4) }
       when 0x44
-        ->(io) { io.pos += 8 }
+        ->(io) { io.skip_bytes(8) }
       when 0x45..0xBF
         nil
       else
         ->(_) { raise WARB::BinaryError }
+      end
+    end
+
+    def retain_pos
+      saved = pos
+      begin
+        yield self
+      ensure
+        pos = saved
       end
     end
 
@@ -75,6 +81,26 @@ module WARB
         raise WARB::BinaryError if skipped_bits >= bits
         break if readbyte[7] == 0
         skipped_bits += 8
+      end
+      self
+    end
+
+    # @param [Integer] bytes
+    def skip_bytes(bytes)
+      raise WARB::BinaryError if bytes > remain
+      pos += bytes
+      self
+    end
+
+    # @return [Integer]
+    def read_next_structured_instr
+      loop do
+        instr = readbyte
+        if instr == 0x02 || instr == 0x03 || instr == 0x04 || instr == 0x05 || instr == 0x0B
+          break instr
+        else
+          NON_STRUCTURED_INSTR_SKIPPER_MAP[instr]&.call(self)
+        end
       end
     end
 
@@ -117,18 +143,6 @@ module WARB
     def read_vector
       Array.new(read_u32) do |i|
         yield i
-      end
-    end
-
-    # @return [Integer]
-    def read_next_structured_instr
-      loop do
-        instr = readbyte
-        if instr == 0x02 || instr == 0x03 || instr == 0x04 || instr == 0x05 || instr == 0x0B
-          break instr
-        else
-          NON_STRUCTURED_INSTR_SKIPPER_MAP[instr]&.call(self)
-        end
       end
     end
 

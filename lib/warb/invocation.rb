@@ -12,17 +12,14 @@ module WARB
       end
 
       @stack.push_new_frame(@func)
-      @stack.push_label(@func.blocks[0])
+      @stack.push_label(@func.blocks.root)
 
       ret =
         loop do
           instr = @stack.current_frame.func.instructions.advance
           WARB::Instructions::MAP[instr].call(@mod, @stack, @stack.current_frame)
 
-          if @stack.frames == 1 && @stack.current_frame.func.instructions.eof?
-            @stack.pop_current_frame
-            break @stack.to_a.first
-          end
+          break @stack.to_a.dup if @stack.current_frame.nil?
         end
 
       @stack.reset

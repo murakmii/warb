@@ -22,10 +22,8 @@ module WARB
         )
       end
 
-      raise WARB::BinaryError unless @type.param_types == @locals.slice(0, @type.param_types.size)
-
-      @instructions = WARB::BinaryIO.new(io.read(size - (io.pos - pos)))
-      @blocks = WARB::ControlFlow::Block.from_function_body(@type, @instructions).flatten_nested_blocks
+      @instructions = WARB::ModuleIO.new(io.read(size - (io.pos - pos)))
+      @blocks = WARB::ControlFlow::IndexedBlocks.from_function_body(self)
       @instructions.rewind
     end
 

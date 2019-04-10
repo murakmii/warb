@@ -3,18 +3,7 @@ module WARB
     attr_reader :sym
 
     def self.from_byte(byte)
-      case byte
-      when 0x7F
-        i32
-      when 0x7E
-        i64
-      when 0x7D
-        f32
-      when 0x7C
-        f64
-      else
-        raise WARB::BinaryError
-      end
+      MAP[byte - 0x7C] || raise(WARB::BinaryError)
     end
 
     def self.i32
@@ -38,9 +27,7 @@ module WARB
       @zero_value = zero_value
     end
 
-    def zero_value
-      WARB::Value.new(self, @zero_value)
-    end
+    MAP = [f64, f32, i64, i32].freeze
 
     def ==(t)
       t.is_a?(self.class) && sym == t.sym
@@ -48,6 +35,10 @@ module WARB
 
     def inspect
       sym.to_s
+    end
+
+    def alloc
+      WARB::Value.new(self, @zero_value)
     end
   end
 end

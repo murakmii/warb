@@ -10,11 +10,11 @@ module WARB
 
       when 0x0B
         ->(_, stack, frame) {
-          popped_block = stack.delete_inner_most_label
-          if popped_block
-            frame.jump_to_end_of_block(popped_block)
-          else
+          popped_block = stack.pop_inner_most_label
+          if stack.no_label_on_current_frame?
             stack.pop_current_frame
+          else
+            frame.jump_to_end_of_block(popped_block)
           end
         }
 

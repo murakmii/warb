@@ -1,10 +1,11 @@
 module WARB
   class Frame
-    attr_reader :func, :local_vars
+    attr_reader :func, :labels, :local_vars
 
     def initialize(func, args)
       @func = func
-      @local_vars = args + func.locals.map(&:zero_value)
+      @labels = []
+      @local_vars = args + func.locals.map(&:alloc)
       @saved_pc = nil
     end
 

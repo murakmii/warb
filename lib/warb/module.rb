@@ -68,7 +68,7 @@ module WARB
     end
 
     def initialize(binary)
-      io = WARB::BinaryIO.new(binary)
+      io = WARB::ModuleIO.new(binary)
 
       unless io.read(MAGIC_AND_VERSION.length) == MAGIC_AND_VERSION
         raise WARB::BinaryError, "Invalid header"

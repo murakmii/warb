@@ -1,5 +1,7 @@
 module WARB
   class Stack
+    EMPTY_ARRAY = [].freeze
+
     def initialize
       @stack = []
       @frame_indexes = []
@@ -18,6 +20,14 @@ module WARB
       @frame_indexes.last ? @stack[@frame_indexes.last] : nil
     end
 
+    def no_label_on_current_frame?
+      current_frame && current_frame.labels.empty?
+    end
+
+    def frame_on_top?
+      @stack.size - 1 == @frame_indexes.last
+    end
+
     def frames
       @frame_indexes.size
     end
@@ -26,19 +36,32 @@ module WARB
       @stack.pop
     end
 
-    def pop_label(nth)
-      index = find_nth_label_index(nth)
-      raise WARB::BinaryError unless index
+    def pop_value(type)
+      raise WARB::BinaryError unless peek.is_a?(WARB::Value) && peek.type == type
+      pop
+    end
 
+    def pop_values(types)
+      return EMPTY_ARRAY if types.empty?
+
+      count = types.size
+      values = Array.new(count)
+
+      (count - 1).downto(0).each {|i| values[i] = pop_value(types[i]) }
+      values
+    end
+
+    def pop_label(nth)
+      raise WARB::BinaryError if current_frame.nil? || nth >= current_frame.labels.size
+
+      index = current_frame.labels[-(nth + 1)]
       label = @stack[index]
-      value = nil
-      if label.block.arity
-        value = pop
-        raise WARB::BinaryError unless value.is_a?(WARB::Value) && value.type == label.block.arity
-      end
+
+      returned = pop_values(label.block.return_types)
 
       @stack.slice!(index..-1)
-      @stack.push(value) if value
+      current_frame.labels.slice!(-(nth + 1)..-1)
+      @stack.concat(returned) if returned.any?
 
       label.block
     end
@@ -46,24 +69,20 @@ module WARB
     def pop_current_frame
       raise WARB::BinaryError unless current_frame
 
-      return_value = nil
-      if current_frame.func.type.return_type
-        raise WARB::BinaryError unless peek.is_a?(WARB::Value) && peek.type == current_frame.func.type.return_type
-        return_value = pop
-      end
+      returned = pop_values(current_frame.func.type.return_types)
 
-      raise WARB::BinaryError unless @frame_indexes.last == (@stack.size - 1)
+      raise WARB::BinaryError unless frame_on_top?
 
       @stack.pop
       @frame_indexes.pop
-      @stack << return_value if return_value
+      @stack.concat(returned) if returned.any?
 
       current_frame&.on_activated
     end
 
-    def delete_inner_most_label
-      index = find_nth_label_index(0)
-      index ? @stack.delete_at(index).block : nil
+    def pop_inner_most_label
+      index = current_frame&.labels&.pop
+      index ? @stack.delete_at(index).block : raise(WARB::BinaryError)
     end
 
     def peek(index = -1)
@@ -80,14 +99,13 @@ module WARB
 
     def push_label(block)
       @stack << WARB::Label.new(block)
+      current_frame.labels << (@stack.size - 1)
     end
 
     def push_new_frame(func)
       args = Array.new(func.type.param_types.size)
-      func.type.param_types.each.with_index do |t, i|
-        arg = pop
-        raise WARB::BinaryError unless arg.type == t
-        args[i] = arg
+      (args.size - 1).downto(0) do |i|
+        args[i] = pop_value(func.type.param_types[i])
       end
 
       frame = WARB::Frame.new(func, args)
@@ -98,21 +116,6 @@ module WARB
 
       @stack << frame
       @frame_indexes << (@stack.size - 1)
-    end
-
-    def find_nth_label_index(nth)
-      n = 0
-      @stack.each_with_index.reverse_each do |e, i|
-        if e.is_a?(WARB::Frame)
-          break nil
-        elsif e.is_a?(WARB::Label)
-          if n == nth
-            break i
-          else
-            n += 1
-          end
-        end
-      end
     end
   end
 end
