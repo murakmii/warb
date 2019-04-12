@@ -185,7 +185,12 @@ module WARB
         end
 
         if signed[offset - 1] == 1
-          signed | (~0 << offset)
+          signed |= (~0 << offset)
+          if signed < 0
+            signed + 2**bits
+          else
+            signed
+          end
         else
           signed
         end

@@ -125,5 +125,9 @@ module WARB
         raise WARB::BinaryError unless io.pos == expected_pos
       end
     end
+
+    def memory(index)
+      @memory[index] || raise(WARB::BinaryError)
+    end
   end
 end
