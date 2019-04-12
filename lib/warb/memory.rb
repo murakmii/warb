@@ -54,7 +54,7 @@ module WARB
 
     def store_float(offset, bits, value)
       bytes = bits / 8
-      pack(offset, bytes, INT_PACK_TPL_MAP[bytes], value)
+      pack(offset, bytes, FLOAT_PACK_TPL_MAP[bytes], value)
     end
 
     def inspect
