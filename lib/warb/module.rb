@@ -35,12 +35,27 @@ module WARB
         end
       end
 
+      def read_table_section(io)
+        io.read_vector { WARB::Table.from_io(io) }
+      end
+
       def read_memory_section(io)
         io.read_vector { WARB::Memory.from_io(io) }
       end
 
       def read_global_section(io)
         io.read_vector { WARB::Global.from_io(io) }
+      end
+
+      def read_element_section(io, functions, tables)
+        io.read_vector do
+          table = tables[io.read_u32]
+          raise WARB::BinaryError unless table
+
+          offset = WARB::ConstantExpr.evaluate(io)
+
+          io.read_vector {|i| table[offset + i] = functions[io.read_u32] }
+        end
       end
 
       def read_code_section(io, functions)
@@ -78,6 +93,7 @@ module WARB
       @functions = []
       @memories = []
       @globals = []
+      @tables = []
       @customs = []
 
       last_id = 0
@@ -101,7 +117,7 @@ module WARB
         when FUCNTION_SECTION_ID
           @functions = self.class.read_function_section(io, @function_types)
         when TABLE_SECTION_ID
-          self.class.read_stub(io, size)
+          @tables = self.class.read_table_section(io)
         when MEMORY_SECTION_ID
           @memories = self.class.read_memory_section(io)
         when GLOBAL_SECTION_ID
@@ -111,7 +127,7 @@ module WARB
         when START_SECTION_ID
           self.class.read_stub(io, size)
         when ELEMENT_SECTION_ID
-          self.class.read_stub(io, size)
+          self.class.read_element_section(io, @functions, @tables)
         when CODE_SECTION_ID
           self.class.read_code_section(io, @functions)
         when DATA_SECTION_ID
