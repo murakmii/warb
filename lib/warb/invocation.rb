@@ -6,18 +6,15 @@ module WARB
       @stack = WARB::Stack.new
     end
 
-    def execute(*args)
-      args.each_slice(2) do |(type, value)|
-        @stack.push_value(type, value)
-      end
+    def execute(*vars)
+      vars.each {|v| @stack.push(v) }
 
-      @stack.push_new_frame(@func)
-      @stack.push_label(@func.blocks.root)
+      @stack.push_new_frame(@func, @mod)
 
       ret =
         loop do
-          instr = @stack.current_frame.func.instructions.advance
-          WARB::Instructions::MAP[instr].call(@mod, @stack, @stack.current_frame)
+          instr = @stack.current_frame.func.body.advance
+          WARB::Instructions.execute(@stack, instr)
 
           break @stack.to_a.dup if @stack.current_frame.nil?
         end

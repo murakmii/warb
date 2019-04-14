@@ -1,5 +1,7 @@
 module WARB
   class Table
+    attr_reader :elem_type
+
     def self.from_io(io)
       elem_type =
         case io.readbyte
@@ -28,6 +30,10 @@ module WARB
       end
 
       @elements[index] = element
+    end
+
+    def [](index)
+      @elements[index] || raise(WARB::BinaryError)
     end
   end
 end

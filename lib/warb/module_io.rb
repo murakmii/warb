@@ -41,9 +41,14 @@ module WARB
       end
     end
 
+    def pc
+      pos
+    end
+
     def retain_pos
       saved = pos
       begin
+        rewind
         yield self
       ensure
         pos = saved

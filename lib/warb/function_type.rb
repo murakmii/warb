@@ -1,27 +1,31 @@
 module WARB
   class FunctionType
-    attr_reader :param_types, :return_types
+    attr_reader :arity, :return_arity
 
     def self.from_io(io)
       raise WARB::BinaryError unless io.readbyte == 0x60
 
-      param_types = io.read_vector { WARB::ValueType.from_byte(io.readbyte) }
-      return_types = io.read_vector { WARB::ValueType.from_byte(io.readbyte) }
-
-      new(param_types, return_types)
+      new(
+        io.read_vector { WARB::Value::ClassDetector.from_byte(io.readbyte) },
+        io.read_vector { WARB::Value::ClassDetector.from_byte(io.readbyte) },
+      )
     end
 
-    def initialize(param_types, return_types)
-      raise WARB::BinaryError if return_types.size > 1
+    def initialize(arity, return_arity)
+      raise WARB::BinaryError if return_arity.size > 1
 
-      @param_types = param_types
-      @return_types = return_types
+      @arity = arity
+      @return_arity = return_arity
+    end
+
+    def ==(other_ft)
+      other_ft.is_a?(self.class) && other_ft.arity == arity && other_ft.return_arity == return_arity
     end
 
     def inspect
       "#<#{self.class} " \
-      "(#{@param_types.map(&:inspect).join(",")})=>" \
-      "(#{@return_types.map(&:inspect).join(",")})>" \
+      "(#{@arity.map(&:inspect).join(",")})=>" \
+      "(#{@return_arity.map(&:inspect).join(",")})>" \
     end
   end
 end

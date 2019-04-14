@@ -70,7 +70,7 @@ module WARB
         io.read_vector do
           raise WARB::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
 
-          memories.first.write(
+          memories.first.store_data(
             WARB::ConstantExpr.evaluate(io),
             io.read(io.read_u32),
           )
@@ -142,8 +142,20 @@ module WARB
       end
     end
 
+    def type(index)
+      @function_types[index] || raise(WARB::BinaryError)
+    end
+
+    def table(index)
+      @tables[index] || raise(WARB::BinaryError)
+    end
+
     def memory(index)
-      @memory[index] || raise(WARB::BinaryError)
+      @memories[index] || raise(WARB::BinaryError)
+    end
+
+    def function(index)
+      @functions[index] || raise(WARB::BinaryError)
     end
   end
 end

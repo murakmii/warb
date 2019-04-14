@@ -4,4 +4,5 @@ module WARB
 
   class Trap < Error; end
   class MemoryOutOfBoundError < Trap; end
+  class Unreachable < Trap; end
 end

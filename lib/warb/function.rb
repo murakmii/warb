@@ -1,11 +1,11 @@
 module WARB
   class Function
-    attr_reader :type, :locals, :blocks, :instructions
+    attr_reader :type, :locals, :blocks, :body
 
     def initialize(type)
       @type = type
       @locals = []
-      @instructions = nil
+      @body = nil
       @blocks = nil
     end
 
@@ -15,20 +15,16 @@ module WARB
 
       io.read_vector do
         @locals.concat(
-          Array.new(
-            io.read_u32,
-            WARB::ValueType.from_byte(io.readbyte),
-          )
+          Array.new(io.read_u32, WARB::Value::ClassDetector.from_byte(io.readbyte))
         )
       end
 
-      @instructions = WARB::ModuleIO.new(io.read(size - (io.pos - pos)))
-      @blocks = WARB::ControlFlow::IndexedBlocks.from_function_body(self)
-      @instructions.rewind
+      @body = WARB::ModuleIO.new(io.read(size - (io.pos - pos)))
+      @blocks = WARB::Structured::IndexedBlocks.from_function_body(self)
     end
 
     def inspect
-      "#<#{self.class} locals:#{@locals.size} instr:#{@instructions.size}>"
+      "#<#{self.class} locals:#{@locals.size} instr:#{@body.size}>"
     end
   end
 end

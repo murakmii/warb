@@ -4,7 +4,7 @@ module WARB
 
     def self.from_io(io)
       new(
-        WARB::ValueType.from_byte(io.readbyte),
+        WARB::Value::ClassDetector.from_byte(io.readbyte),
         io.read_flag,
         WARB::ConstantExpr.evaluate(io)
       )
