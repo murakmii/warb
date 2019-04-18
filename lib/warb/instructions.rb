@@ -99,8 +99,13 @@ module WARB
         when 0x22 # local.tee
           s.f.set_local_var(s.f.func.body.read_u32, s.peek.clone)
 
-        # when 0x23 global.get
-        # when 0x24 global.set
+        when 0x23 # global.get
+          s.push(s.f.mod.global(s.f.func.body.read_u32).value.clone)
+
+        when 0x24 # global.set
+          g = s.f.mod.global(s.f.func.body.read_u32)
+          raise WARB::BinaryError unless g.mutable?
+          g.set(s.pop_value(g.value_class))
 
         #
         # Memory Instructions
@@ -152,6 +157,12 @@ module WARB
 
         when 0x42 # i64.const
           s.push(WARB::Value::I64.new(s.f.func.body.read_i64))
+
+        when 0x43 # f32.const
+          s.push(WARB::Value::F32.new(s.f.func.body.read_f32))
+
+        when 0x44 # f64.const
+          s.push(WARB::Value::F64.new(s.f.func.body.read_f64))
 
         when 0x46 # i32.eq
           c2 = s.pop_value(WARB::Value::I32)

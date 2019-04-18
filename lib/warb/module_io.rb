@@ -129,6 +129,16 @@ module WARB
       read_signed_leb128(64)
     end
 
+    # @return [Float]
+    def read_f32
+      read(4).unpack("e")
+    end
+
+    # @return [Float]
+    def read_f64
+      read(8).unpack("E")
+    end
+
     # @return [Boolean]
     def read_flag
       b =readbyte

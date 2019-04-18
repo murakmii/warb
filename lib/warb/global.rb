@@ -1,23 +1,26 @@
 module WARB
   class Global
-    attr_reader :value_type, :value
+    attr_reader :value_class, :value
 
-    def self.from_io(io)
-      new(
-        WARB::Value::ClassDetector.from_byte(io.readbyte),
-        io.read_flag,
-        WARB::ConstantExpr.evaluate(io)
-      )
+    def self.from_io(mod, io)
+      global = new(WARB::Value::ClassDetector.from_byte(io.readbyte), io.read_flag)
+      global.set(WARB::ConstantExpr.evaluate(mod, io))
+      global
     end
 
-    def initialize(value_type, mutable, value)
-      @value_type = value_type
+    def initialize(value_class, mutable)
+      @value_class = value_class
       @mutable = mutable
-      @value =value
+      @value = nil
     end
 
     def mutable?
       @mutable
+    end
+
+    def set(value)
+      raise WARB::BinaryError unless value.class == @value_class
+      @value = value
     end
   end
 end

@@ -43,37 +43,11 @@ module WARB
         io.read_vector { WARB::Memory.from_io(io) }
       end
 
-      def read_global_section(io)
-        io.read_vector { WARB::Global.from_io(io) }
-      end
-
-      def read_element_section(io, functions, tables)
-        io.read_vector do
-          table = tables[io.read_u32]
-          raise WARB::BinaryError unless table
-
-          offset = WARB::ConstantExpr.evaluate(io)
-
-          io.read_vector {|i| table[offset + i] = functions[io.read_u32] }
-        end
-      end
-
       def read_code_section(io, functions)
         io.read_vector do |i|
           raise WARB::BinaryError unless functions[i]
 
           functions[i].set_code_from_io(io)
-        end
-      end
-
-      def read_data_section(io, memories)
-        io.read_vector do
-          raise WARB::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
-
-          memories.first.store_data(
-            WARB::ConstantExpr.evaluate(io),
-            io.read(io.read_u32),
-          )
         end
       end
 
@@ -121,17 +95,17 @@ module WARB
         when MEMORY_SECTION_ID
           @memories = self.class.read_memory_section(io)
         when GLOBAL_SECTION_ID
-          @globals = self.class.read_global_section(io)
+          read_global_section(io)
         when EXPORT_SECTION_ID
           self.class.read_stub(io, size)
         when START_SECTION_ID
           self.class.read_stub(io, size)
         when ELEMENT_SECTION_ID
-          self.class.read_element_section(io, @functions, @tables)
+          read_element_section(io)
         when CODE_SECTION_ID
           self.class.read_code_section(io, @functions)
         when DATA_SECTION_ID
-          self.class.read_data_section(io, @memories)
+          read_data_section(io)
         else
           unless section_id == CUSTOM_SECTION_ID
             raise WARB::BinaryError, "Unsupported section id: #{section_id}"
@@ -157,5 +131,37 @@ module WARB
     def function(index)
       @functions[index] || raise(WARB::BinaryError)
     end
+
+    def global(index)
+      @globals[index] || raise(WARB::BinaryError)
+    end
+
+    private
+
+      def read_global_section(io)
+        io.read_vector { @globals << WARB::Global.from_io(self, io) }
+      end
+
+      def read_element_section(io)
+        io.read_vector do
+          t = table(io.read_u32)
+          offset = WARB::ConstantExpr.evaluate(self, io)
+
+          raise WARB::BinaryError unless offset.is_a?(WARB::Value::I32)
+
+          io.read_vector {|i| t[offset.value + i] = function(io.read_u32) }
+        end
+      end
+
+      def read_data_section(io)
+        io.read_vector do
+          raise WARB::BinaryError if io.readbyte != 0 # Allowed only 0(default linear memory)
+          offset = WARB::ConstantExpr.evaluate(self, io)
+
+          raise WARB::BinaryError unless offset.is_a?(WARB::Value::I32)
+
+          memory(0).store_data(offset.value, io.read(io.read_u32))
+        end
+      end
   end
 end
