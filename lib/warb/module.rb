@@ -70,6 +70,13 @@ module WARB
       @tables = []
       @customs = []
 
+      @exported_functions = {}
+      @exported_tables = {}
+      @exported_memories = {}
+      @exported_globals = {}
+
+      @start_index = nil
+
       last_id = 0
       until io.eof? do
         section_id = io.readbyte
@@ -97,9 +104,9 @@ module WARB
         when GLOBAL_SECTION_ID
           read_global_section(io)
         when EXPORT_SECTION_ID
-          self.class.read_stub(io, size)
+          read_export_section(io)
         when START_SECTION_ID
-          self.class.read_stub(io, size)
+          @start_index = io.read_u32
         when ELEMENT_SECTION_ID
           read_element_section(io)
         when CODE_SECTION_ID
@@ -136,6 +143,24 @@ module WARB
       @globals[index] || raise(WARB::BinaryError)
     end
 
+    def exported_function_names
+      @exported_functions.keys
+    end
+
+    def exported_function(name)
+      WARB::ContextualFunction.new(
+        self,
+        function(@exported_functions[name] || raise(WARB::BinaryError))
+      )
+    end
+
+    def start_function
+      WARB::ContextualFunction.new(
+        self,
+        function(@start_index || raise(WARB::BinaryError))
+      )
+    end
+
     private
 
       def read_global_section(io)
@@ -161,6 +186,25 @@ module WARB
           raise WARB::BinaryError unless offset.is_a?(WARB::Value::I32)
 
           memory(0).store_data(offset.value, io.read(io.read_u32))
+        end
+      end
+
+      def read_export_section(io)
+        io.read_vector do
+          name = io.read_utf8
+
+          case io.readbyte
+          when 0x00
+            @exported_functions[name] = io.read_u32
+          when 0x01
+            @exported_tables[name] = io.read_u32
+          when 0x02
+            @exported_memories[name] = io.read_u32
+          when 0x03
+            @exported_globals[name] = io.read_u32
+          else
+            raise WARB::BinaryError
+          end
         end
       end
   end

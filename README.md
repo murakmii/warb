@@ -5,8 +5,13 @@ WARB is WebAssembly interpreter implemented by pure Ruby.
 ```ruby
 mod = WARB::Module.from_file("fib.wasm")
 
-invocation = WARB::Invocation.new(mod, mod.functions.last)
+mod.exported_function_names
+=> ["main", "fib"]
 
-invocation.execute(WARB::Value::I32.new(30))
-=> #<WARB::Value i32 value:832040>
+mod.exported_function("fib").invoke(WARB::Value::I32.new(30))
+=> [#<WARB::Value::I32:0x00007f9f1003a028 @value=832040>]
 ```
+
+## TODO
+
+ * Implementing numeric instructions
