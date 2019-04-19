@@ -164,6 +164,13 @@ module WARB
         when 0x44 # f64.const
           s.push(WARB::Value::F64.new(s.f.func.body.read_f64))
 
+        # i32 itestop, irelop
+
+        when 0x45 # i32.eqz
+          i = s.pop_value(WARB::Value::I32)
+          i.replace(i.value == 0 ? 1 : 0)
+          s.push(i)
+
         when 0x46 # i32.eq
           c2 = s.pop_value(WARB::Value::I32)
           c1 = s.pop_value(WARB::Value::I32)
@@ -178,6 +185,160 @@ module WARB
           c2 = s.pop_value(WARB::Value::I32).signed
           c1 = s.pop_value(WARB::Value::I32).signed
           s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x49 # i32.lt_u
+          c2 = s.pop_value(WARB::Value::I32).unsigned
+          c1 = s.pop_value(WARB::Value::I32).unsigned
+          s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x4A # i32.gt_s
+          c2 = s.pop_value(WARB::Value::I32).signed
+          c1 = s.pop_value(WARB::Value::I32).signed
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x4B # i32.gt_u
+          c2 = s.pop_value(WARB::Value::I32).unsigned
+          c1 = s.pop_value(WARB::Value::I32).unsigned
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x4C # i32.le_s
+          c2 = s.pop_value(WARB::Value::I32).signed
+          c1 = s.pop_value(WARB::Value::I32).signed
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x4D # i32.le_u
+          c2 = s.pop_value(WARB::Value::I32).unsigned
+          c1 = s.pop_value(WARB::Value::I32).unsigned
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x4E # i32.ge_s
+          c2 = s.pop_value(WARB::Value::I32).signed
+          c1 = s.pop_value(WARB::Value::I32).signed
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
+
+        when 0x4F # i32.ge_u
+          c2 = s.pop_value(WARB::Value::I32).unsigned
+          c1 = s.pop_value(WARB::Value::I32).unsigned
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
+
+        # i64 itestop, irelop
+
+        when 0x50 # i64.eqz
+          s.push(WARB::Value::I32.new(s.pop_value(WARB::Value::I64).value == 0 ? 1 : 0))
+
+        when 0x51 # i64.eq
+          c2 = s.pop_value(WARB::Value::I64)
+          c1 = s.pop_value(WARB::Value::I64)
+          s.push(WARB::Value::I32.new(c1 == c2 ? 1 : 0))
+
+        when 0x52 # i64.ne
+          c2 = s.pop_value(WARB::Value::I64)
+          c1 = s.pop_value(WARB::Value::I64)
+          s.push(WARB::Value::I32.new(c1 != c2 ? 1 : 0))
+
+        when 0x53 # i64.lt_s
+          c2 = s.pop_value(WARB::Value::I64).signed
+          c1 = s.pop_value(WARB::Value::I64).signed
+          s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x54 # i64.lt_u
+          c2 = s.pop_value(WARB::Value::I64).unsigned
+          c1 = s.pop_value(WARB::Value::I64).unsigned
+          s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x55 # i64.gt_s
+          c2 = s.pop_value(WARB::Value::I64).signed
+          c1 = s.pop_value(WARB::Value::I64).signed
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x56 # i64.gt_u
+          c2 = s.pop_value(WARB::Value::I64).unsigned
+          c1 = s.pop_value(WARB::Value::I64).unsigned
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x57 # i64.le_s
+          c2 = s.pop_value(WARB::Value::I64).signed
+          c1 = s.pop_value(WARB::Value::I64).signed
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x58 # i64.le_u
+          c2 = s.pop_value(WARB::Value::I64).unsigned
+          c1 = s.pop_value(WARB::Value::I64).unsigned
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x59 # i64.ge_s
+          c2 = s.pop_value(WARB::Value::I64).signed
+          c1 = s.pop_value(WARB::Value::I64).signed
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
+
+        when 0x5A # i64.ge_u
+          c2 = s.pop_value(WARB::Value::I64).unsigned
+          c1 = s.pop_value(WARB::Value::I6d).unsigned
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
+
+        # f32 frelop
+
+        when 0x5B # f32.eq
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 == c2 ? 1 : 0))
+
+        when 0x5C # f32.ne
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 != c2 ? 1 : 0))
+
+        when 0x5D # f32.lt
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x5E # f32.gt
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x5F # f32.le
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x60 # f32.ge
+          c2 = s.pop_value(WARB::Value::F32).value
+          c1 = s.pop_value(WARB::Value::F32).value
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
+
+        # f64 frelop
+
+        when 0x61 # f64.eq
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 == c2 ? 1 : 0))
+
+        when 0x62 # f64.ne
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 != c2 ? 1 : 0))
+
+        when 0x63 # f64.lt
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 < c2 ? 1 : 0))
+
+        when 0x64 # f64.gt
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 > c2 ? 1 : 0))
+
+        when 0x65 # f64.le
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 <= c2 ? 1 : 0))
+
+        when 0x66 # f64.ge
+          c2 = s.pop_value(WARB::Value::F64).value
+          c1 = s.pop_value(WARB::Value::F64).value
+          s.push(WARB::Value::I32.new(c1 >= c2 ? 1 : 0))
 
         when 0x6A # i32.add
           c2 = s.pop_value(WARB::Value::I32)
